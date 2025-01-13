@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ToDo application</title>
+
+    <link rel="stylesheet" href="./styles/style.css" />
+
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.min.js"
+      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <h2>ToDo list</h2>
+    <input type="text" id="taskInput" placeholer="Add a new task" />
+    <button id="addTaskBtn">Add task</button>
+    <ul id="taskList">
+      <li>default task</li>
+    </ul>
+
+    <script>
+      $(document).ready(function () {
+        function loadTasks() {
+          $.get("../src/server.php?action=getTasks", function (data) {
+            // const tasks = JSON.parse(data);
+            const tasks = data;
+            $("#taskList").empty();
+            tasks.forEach((task) => {
+              $("#taskList").append(`
+                    <li data-id="${task.id}">
+                        <span class="${task.is_completed ? "completed" : ""}">${
+                task.task
+              }</span>
+                        <button class="editTaskBtn">Edit</button>
+                        <button class="toggleTaskBtn">Done</button>
+                        <button class="deleteTaskBtn">Delete</button>
+                    </li>
+                `);
+            });
+          });
+        }
+
+        $("#addTaskBtn").on("click", function () {
+          const task = $("#taskInput").val().trim();
+          if (task) {
+            $.ajax({
+              url: "../src/server.php?action=addTask",
+              type: "POST",
+              contentType: "application/json",
+              data: JSON.stringify({ task: task }),
+              success: function (response) {
+                console.log(response);
+                const newTask = response;
+                $("#taskList").append(`
+                        <li data-id="${newTask.id}">
+                            <span>${newTask.task}</span>
+                            <button class="editTaskBtn">Edit</button>
+                            <button class="toggleTaskBtn">Done</button>
+                            <button class="deleteTaskBtn">Delete</button>
+                        </li>
+                    `);
+                $("#taskInput").val("");
+              },
+              error: function (xhr, status, error) {
+                console.error("Error: ", error);
+              },
+            });
+          }
+        });
+
+        $("#taskList").on("click", ".deleteTaskBtn", function () {
+          const id = $(this).closest("li").data("id");
+          $.ajax({
+            url: "../src/server.php?action=deleteTask",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({id}),
+            success: function(data) {
+                const response = data;
+                response.success && loadTasks();
+            }
+          })
+        });
+
+        $("#taskList").on("click", ".toggleTaskBtn", function () {
+          const id = $(this).closest("li").data("id");
+          $.ajax({
+            url: "../src/server.php?action=toggleTask",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({id}),
+            success: function(data) {
+                const response = data;
+                response.success && loadTasks();
+            },
+            error: function(xhr, status, error){console.error("Error: ", error)},
+          })
+        });
+
+        $("#taskList").on("click", ".editTaskBtn", function () {
+          const id = $(this).closest("li").data("id");
+          const newValue = prompt(
+            "Enter new text",
+            $(this).prev().text()
+          ).trim() || "new text";
+          console.log(newValue);
+        $.ajax({
+            url: "../src/server.php?action=editTask",
+            type: "POST",
+            constentType: "application/json",
+            data: JSON.stringify({id: id, task: newValue}),
+            success: function(data){
+                const response = data;
+                response.success && loadTasks();
+            },
+            error: function(xhr, status, error) {console.error("Error: ", error)}
+        })
+        });
+
+        loadTasks();
+      });
+    </script>
+
+    <footer>
+      <ul>
+        <li>JQuery</li>
+        <li>PHP</li>
+        <li>MySQL</li>
+      </ul>
+    </footer>
+  </body>
+</html>
