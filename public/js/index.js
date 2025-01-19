@@ -1,11 +1,11 @@
-import task from "./components/task.js";
+import taskComponent from "./components/task.js";
 
 $(document).ready(function () {
   function loadTasks() {
     $.get("../src/api/server.php?action=getTasks", function (data) {
       const tasks = data;
       $("#taskList").empty();
-      tasks.forEach((data) => $("#taskList").append(task.view(data)));
+      tasks.forEach((data) => $("#taskList").append(taskComponent.view(data)));
     });
   }
 
@@ -30,19 +30,12 @@ $(document).ready(function () {
         },
       })
         .done((response) => {
-          $("#taskList").append(`
-            <li class="list-group-item shadow m-2">
-                <span>${task}</span>
-                <button class="btn btn-primary rounded editTaskBtn" data-id="${response.id}">Edit</button>
-                <button class="btn btn-success rounded toggleTaskBtn" data-id="${response.id}">Done</button>
-                <button class="btn btn-danger rounded deleteTaskBtn" data-id="${response.id}">Delete</button>
-            </li>
-          `);
+          $("#taskList").append(
+            taskComponent.view({ id: response.id, task, is_completed: false })
+          );
           $("#taskInput").val("");
         })
-        .fail((xhr, status, error) => {
-          console.error(error);
-        })
+        .fail((xhr, status, error) => console.error(error))
         .always(() => $(this).prop("disabled", false));
     }
   });
@@ -69,9 +62,7 @@ $(document).ready(function () {
         },
       })
         .done(() => loadTasks())
-        .fail((xhr, status, error) => {
-          console.error("Error: ", error);
-        });
+        .fail((xhr, status, error) => console.error("Error: ", error));
     }
   });
 
