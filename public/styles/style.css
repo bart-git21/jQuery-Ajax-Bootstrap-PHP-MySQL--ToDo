@@ -1,4 +1,39 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+    min-height: 100vh;
+    display: grid;
+    align-items: stretch;
+}
+
+.list-group-item:hover {
+  background-color: beige;
+}
+
 .completed {
-    text-decoration: line-through;
-    color: green;
+  text-decoration: line-through;
+  color: green;
+}
+
+.footer {
+  font-size: 14px;
+  background-color: #f3f3f3;
+  width: 100%;
+  max-height: max-content;
+  text-align: center;
+  padding: 20px;
+
+  ul {
+    display: grid;
+  }
+
+  li {
+    justify-self: center;
+  }
 }
