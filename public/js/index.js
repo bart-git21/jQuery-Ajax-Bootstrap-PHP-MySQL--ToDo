@@ -66,36 +66,49 @@ $(document).ready(function () {
     }
   });
 
-  $("#taskList").on("click", ".toggleTaskBtn", function () {
+  let clickTimeout;
+  let isDobleClick = false;
+
+  $("#taskList").on("dblclick", ".task", function () {
+    isDobleClick = true;
     const id = $(this).data("id");
-    $.ajax({
-      url: "../src/api/server.php?action=toggleTask",
-      method: "POST",
-      contentType: "application/json",
-      headers: {
-        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-      },
-      data: JSON.stringify({ id }),
-    })
-      .done((response) => response.success && loadTasks())
-      .fail((xhr, status, error) => console.error("Error: ", error));
+    const newValue = prompt("Enter new text", $(this).text().trim());
+
+    if (newValue) {
+      $.ajax({
+        url: "../src/api/server.php?action=editTask",
+        method: "POST",
+        contentType: "application/json",
+        headers: {
+          "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+        },
+        data: JSON.stringify({ id: id, task: newValue }),
+      })
+        .done((response) => response.success && loadTasks())
+        .fail((xhr, status, error) => console.error("Error: ", error));
+    } else alert("Not editing task");
   });
 
-  $("#taskList").on("click", ".editTaskBtn", function () {
-    const id = $(this).data("id");
-    const newValue =
-      prompt("Enter new text", $(this).prev().text()).trim() || "new text";
-    $.ajax({
-      url: "../src/api/server.php?action=editTask",
-      method: "POST",
-      contentType: "application/json",
-      headers: {
-        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-      },
-      data: JSON.stringify({ id: id, task: newValue }),
-    })
-      .done((response) => response.success && loadTasks())
-      .fail((xhr, status, error) => console.error("Error: ", error));
+  $("#taskList").on("click", ".task", function () {
+    clickTimeout = setTimeout(() => {
+      if (isDobleClick) {
+        clearTimeout(clickTimeout);
+        isDobleClick = false;
+        return;
+      }
+      const id = $(this).data("id");
+      $.ajax({
+        url: "../src/api/server.php?action=toggleTask",
+        method: "POST",
+        contentType: "application/json",
+        headers: {
+          "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+        },
+        data: JSON.stringify({ id }),
+      })
+        .done((response) => response.success && loadTasks())
+        .fail((xhr, status, error) => console.error("Error: ", error));
+    }, 200);
   });
 
   loadTasks();
