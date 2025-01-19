@@ -7,18 +7,38 @@
 }
 
 body {
-    min-height: 100vh;
-    display: grid;
-    align-items: stretch;
+  min-height: 100vh;
+  display: grid;
+  align-items: stretch;
+}
+
+.list-group-item {
+  padding: 0;
+
+  .task {
+    display: inline-block;
+    padding: 10px 20px;
+    user-select: none;
+  }
+
+  .completed {
+    text-decoration: line-through;
+    color: green;
+  }
+
+  .deleteTaskBtn {
+    transition: all 0.5s ease-in-out;
+    opacity: 0;
+  }
 }
 
 .list-group-item:hover {
   background-color: beige;
-}
 
-.completed {
-  text-decoration: line-through;
-  color: green;
+  .deleteTaskBtn {
+    transition: all 0.3s ease-in-out;
+    opacity: 1;
+  }
 }
 
 .footer {
